@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MonoVehicle.Data;
 using MonoVehicle.Models;
+using MonoVehicle.Models.ViewModels;
 
 namespace MonoVehicle.Controllers
 {
@@ -22,8 +23,68 @@ namespace MonoVehicle.Controllers
         // GET: VehicleModels
         public async Task<IActionResult> Index()
         {
-            var vehicleContext = _context.VehicleModels.Include(v => v.Make);
-            return View(await vehicleContext.ToListAsync());
+            //ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            //ViewData["AbrvSortParm"] = sortOrder == "Abrv" ? "abrv_desc" : "Abrv";
+
+            //var vehicleContext = _context.VehicleModels.Include(v => v.Make);
+            //var employees = (from employee in this._dbContext.Employees
+            //                 join desig in this._dbContext.Designations on employee.DepartmentId equals desig.DesignationId
+            //                 join dept in this._dbContext.Departments on employee.DepartmentId equals dept.DepartmentId
+            //                 select new Employee
+            //                 {
+            //                     Id = employee.Id,
+            //                     EmployeeCode = employee.EmployeeCode,
+            //                     EmployeeName = employee.EmployeeName,
+            //                     DateOfBirth = employee.DateOfBirth,
+            //                     JoinDate = employee.JoinDate,
+            //                     Salary = employee.Salary,
+            //                     Address = employee.Address,
+            //                     State = employee.State,
+            //                     City = employee.City,
+            //                     ZipCode = employee.ZipCode,
+            //                     DepartmentId = employee.DepartmentId,
+            //                     DepartmentName = dept.DepartmentName,
+            //                     DesignationId = employee.DesignationId,
+            //                     DesignationName = desig.DesignationName
+            //                 }).ToList();
+
+            var models = await (from model in this._context.VehicleModels
+                                join make in this._context.VehicleMakes on model.MakeId equals make.Id
+                                select new VehicleModelViewModel
+                                {
+                                    Id = model.Id,
+
+                                    Name = model.Name,
+
+                                    MakeId = model.MakeId,
+
+                                    Abrv = model.Abrv,
+
+                                    MakeName = make.Name
+                                    
+                                }).ToListAsync();
+
+
+            //switch (sortOrder)
+            //{
+            //    case "name_desc":
+            //        models = models.OrderByDescending(m => m.Name);
+            //        break;
+            //    case "Abrv":
+            //        models = models.OrderBy(m => m.Abrv);
+            //        break;
+            //    case "abrv_desc":
+            //        models = models.OrderByDescending(m => m.Abrv);
+            //        break;
+            //    default:
+            //        models = models.OrderBy(m => m.Name);
+            //        break;
+            //}
+
+
+            //return View(await vehicleContext.ToListAsync());
+            //return View(await models.ToListAsync());
+            return View(models);
         }
 
         // GET: VehicleModels/Details/5

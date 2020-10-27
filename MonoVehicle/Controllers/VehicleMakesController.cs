@@ -20,9 +20,31 @@ namespace MonoVehicle.Controllers
         }
 
         // GET: VehicleMakes
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sortOrder)
         {
-            return View(await _context.VehicleMakes.ToListAsync());
+            ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewData["AbrvSortParm"] = sortOrder == "Abrv" ? "abrv_desc" : "Abrv";
+
+            var makes = from m in _context.VehicleMakes
+                        select m;
+
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    makes = makes.OrderByDescending(m => m.Name);
+                    break;
+                case "Abrv":
+                    makes = makes.OrderBy(m => m.Abrv);
+                    break;
+                case "abrv_desc":
+                    makes = makes.OrderByDescending(m => m.Abrv);
+                    break;
+                default:
+                    makes = makes.OrderBy(m => m.Name);
+                    break;
+            }
+
+            return View(await makes.AsNoTracking().ToListAsync());
         }
 
         // GET: VehicleMakes/Details/5

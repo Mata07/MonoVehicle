@@ -1,4 +1,4 @@
-﻿@model IEnumerable<MonoVehicle.Models.VehicleModel>
+﻿@model IEnumerable<MonoVehicle.Models.ViewModels.VehicleModelViewModel>
 
 @{
     ViewData["Title"] = "Index";
@@ -19,8 +19,11 @@
             <th>
                 @Html.DisplayNameFor(model => model.Abrv)
             </th>
+            @*<th>
+                @Html.DisplayNameFor(model => model.Make.Id)
+            </th>*@
             <th>
-                @Html.DisplayNameFor(model => model.Make)
+                @Html.DisplayNameFor(model => model.MakeName)
             </th>
             <th></th>
         </tr>
@@ -34,8 +37,11 @@
             <td>
                 @Html.DisplayFor(modelItem => item.Abrv)
             </td>
+            @*<td>
+                @Html.DisplayFor(modelItem => item.Make.Id)
+            </td>*@
             <td>
-                @Html.DisplayFor(modelItem => item.Make.Abrv)
+                @Html.DisplayFor(modelItem => item.MakeName)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
