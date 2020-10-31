@@ -1,5 +1,5 @@
-﻿@model IEnumerable<MonoVehicle.Models.ViewModels.VehicleModelViewModel>
-
+﻿@*@model IEnumerable<MonoVehicle.Models.ViewModels.VehicleModelViewModel>*@
+@model IEnumerable<MonoVehicle.Models.VehicleModel>
 @{
     ViewData["Title"] = "Index";
 }
@@ -23,7 +23,7 @@
                     @Html.DisplayNameFor(model => model.Make.Id)
                 </th>*@
         <th>
-            <a asp-action="Index" asp-route-sortOrder="@ViewData["MakeSortParm"]">@Html.DisplayNameFor(model => model.MakeName)</a>                
+            <a asp-action="Index" asp-route-sortOrder="@ViewData["MakeSortParm"]">@Html.DisplayNameFor(model => model.Make.Name)</a>                
         </th>
             <th></th>
         </tr>
@@ -42,7 +42,7 @@
                         @Html.DisplayFor(modelItem => item.Make.Id)
                     </td>*@
                 <td>
-                    @Html.DisplayFor(modelItem => item.MakeName)
+                    @Html.DisplayFor(modelItem => item.Make.Name)
                 </td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
