@@ -1,5 +1,5 @@
-﻿@*@model IEnumerable<MonoVehicle.Models.ViewModels.VehicleModelViewModel>*@
-@model IEnumerable<MonoVehicle.Models.VehicleModel>
+﻿@*@model IEnumerable<MonoVehicle.Models.VehicleModel>*@
+@model PaginatedList<MonoVehicle.Models.VehicleModel>
 @{
     ViewData["Title"] = "Index";
 }
@@ -26,17 +26,20 @@
     <thead>
         <tr>
             <th>
-                <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]">@Html.DisplayNameFor(model => model.Name)</a>
+                @*<a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]">@Html.DisplayNameFor(model => model.Name)</a>*@
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">Model Name</a>
             </th>
             <th>
-                <a asp-action="Index" asp-route-sortOrder="@ViewData["AbrvSortParm"]">@Html.DisplayNameFor(model => model.Abrv)</a>
+                @*<a asp-action="Index" asp-route-sortOrder="@ViewData["AbrvSortParm"]">@Html.DisplayNameFor(model => model.Abrv)</a>*@
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">Abbreviation</a>
             </th>
             @*<th>
                     @Html.DisplayNameFor(model => model.Make.Id)
                 </th>*@
-            <th>
-                <a asp-action="Index" asp-route-sortOrder="@ViewData["MakeSortParm"]">@Html.DisplayNameFor(model => model.Make.Name)</a>
-            </th>
+        <th>
+            @*<a asp-action="Index" asp-route-sortOrder="@ViewData["MakeSortParm"]">@Html.DisplayNameFor(model => model.Make.Name)</a>*@
+            <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">Make Name</a>
+        </th>
             <th></th>
         </tr>
     </thead>
@@ -65,3 +68,36 @@
         }
     </tbody>
 </table>
+
+@{
+    var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+}
+
+@*The paging buttons(links to previous and next page) are displayed by tag helpers:*@
+
+<a asp-action="Index"
+   asp-route-sortOrder="@ViewData["CurrentSort"]"
+   asp-route-pageNumber=1
+   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+   class="btn btn-light @prevDisabled">First</a>
+
+<a asp-action="Index"
+   asp-route-sortOrder="@ViewData["CurrentSort"]"
+   asp-route-pageNumber="@(Model.PageIndex - 1)"
+   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+   class="btn btn-light @prevDisabled">Previous</a>
+
+<span>@Model.PageIndex</span>
+
+<a asp-action="Index"
+   asp-route-sortOrder="@ViewData["CurrentSort"]"
+   asp-route-pageNumber="@(Model.PageIndex + 1)"
+   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+   class="btn btn-light @nextDisabled">Next</a>
+
+<a asp-action="Index"
+   asp-route-sortOrder="@ViewData["CurrentSort"]"
+   asp-route-pageNumber="@(Model.TotalPages)"
+   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+   class="btn btn-light @nextDisabled">Last</a>

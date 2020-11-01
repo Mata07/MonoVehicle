@@ -20,10 +20,23 @@ namespace MonoVehicle.Controllers
         }
 
         // GET: VehicleMakes
-        public async Task<IActionResult> Index(string sortOrder, string searchString)
+        public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int? pageNumber)
         {
+            // The ViewData element named CurrentSort provides the view with the current sort order,
+            // because this must be included in the paging links in order to keep the sort order the same while paging.
+            ViewData["CurrentSort"] = sortOrder;
             ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             ViewData["AbrvSortParm"] = sortOrder == "Abrv" ? "abrv_desc" : "Abrv";
+
+            // If the search string is changed during paging, the page has to be reset to 1
+            if (searchString != null)
+            {
+                pageNumber = 1;
+            }
+            else
+            {
+                searchString = currentFilter; // what is in queryString??
+            }
             ViewData["CurrentFilter"] = searchString;
 
             var makes = from m in _context.VehicleMakes
@@ -52,7 +65,13 @@ namespace MonoVehicle.Controllers
                     break;
             }
 
-            return View(await makes.AsNoTracking().ToListAsync());
+            int pageSize = 3;
+            //return View(await makes.AsNoTracking().ToListAsync());
+
+            // Call CreateAsync(source, pageIndex, pageSize) on PaginatedList<T> and pass it to View
+            // converts the student query to a single page of students in a collection type that supports paging. 
+            // That single page of students is then passed to the view.
+            return View(await PaginatedList<VehicleMake>.CreateAsync(makes.AsNoTracking(), pageNumber ?? 1, pageSize));
         }
 
         // GET: VehicleMakes/Details/5
