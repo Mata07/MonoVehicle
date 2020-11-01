@@ -20,13 +20,20 @@ namespace MonoVehicle.Controllers
         }
 
         // GET: VehicleMakes
-        public async Task<IActionResult> Index(string sortOrder)
+        public async Task<IActionResult> Index(string sortOrder, string searchString)
         {
             ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             ViewData["AbrvSortParm"] = sortOrder == "Abrv" ? "abrv_desc" : "Abrv";
+            ViewData["CurrentFilter"] = searchString;
 
             var makes = from m in _context.VehicleMakes
                         select m;
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                makes = makes.Where(m => m.Name.Contains(searchString)
+                                      || m.Abrv.Contains(searchString));
+            }
 
             switch (sortOrder)
             {

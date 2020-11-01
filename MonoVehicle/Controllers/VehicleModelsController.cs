@@ -74,37 +74,25 @@ namespace MonoVehicle.Controllers
         //    //return View(models);
         //}
 
-        public async Task<IActionResult> Index(string sortOrder)
+        public async Task<IActionResult> Index(string sortOrder, string searchString)
         {
             ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             ViewData["AbrvSortParm"] = sortOrder == "Abrv" ? "abrv_desc" : "Abrv";
             ViewData["MakeSortParm"] = sortOrder == "MakeName" ? "make_desc" : "MakeName";
+            ViewData["CurrentFilter"] = searchString;            
 
+            List<VehicleModel> models = await _context.VehicleModels.Include(v => v.Make).ToListAsync();
 
-            //var models = (from model in this._context.VehicleModels
-            //              join make in this._context.VehicleMakes on model.MakeId equals make.Id
-            //              select new VehicleModelViewModel
-            //              {
-            //                  Id = model.Id,
-
-            //                  Name = model.Name,
-
-            //                  MakeId = model.MakeId,
-
-            //                  Abrv = model.Abrv,
-
-            //                  MakeName = make.Name
-
-            //                  //}).ToListAsync();
-            //              });
-
-            var models = _context.VehicleModels.Include(v => v.Make);
-
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                // search by Make only!
+                models = models.Where(m => m.Make.Name.Contains(searchString)).ToList();
+            }
 
             switch (sortOrder)
             {
                 case "name_desc":
-                    models = models.OrderByDescending(m => m.Name).ToListAs<();
+                    models = models.OrderByDescending(m => m.Name).ToList();
                     break;
                 case "Abrv":
                     models = models.OrderBy(m => m.Abrv).ToList();
@@ -123,9 +111,6 @@ namespace MonoVehicle.Controllers
                     break;
             }
 
-
-            //return View(await vehicleContext.ToListAsync());
-            //return View(await models.ToListAsync());
             return View(models);
         }
 
