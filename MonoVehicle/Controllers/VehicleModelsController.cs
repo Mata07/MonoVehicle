@@ -21,30 +21,36 @@ namespace MonoVehicle.Controllers
         }
 
         // GET: VehicleModels
-        public async Task<IActionResult> Index(string sortOrder)
+        public async Task<IActionResult> Index(string sortOrder, string searchString)
         {
             ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             ViewData["AbrvSortParm"] = sortOrder == "Abrv" ? "abrv_desc" : "Abrv";
             ViewData["MakeSortParm"] = sortOrder == "MakeName" ? "make_desc" : "MakeName";
+            ViewData["CurrentFilter"] = searchString;
 
 
             var models = (from model in this._context.VehicleModels
-                                join make in this._context.VehicleMakes on model.MakeId equals make.Id
-                                select new VehicleModelViewModel
-                                {
-                                    Id = model.Id,
+                          join make in this._context.VehicleMakes on model.MakeId equals make.Id
+                          select new VehicleModelViewModel
+                          {
+                              Id = model.Id,
 
-                                    Name = model.Name,
+                              Name = model.Name,
 
-                                    MakeId = model.MakeId,
+                              MakeId = model.MakeId,
 
-                                    Abrv = model.Abrv,
+                              Abrv = model.Abrv,
 
-                                    MakeName = make.Name
+                              MakeName = make.Name
 
-                                    //}).ToListAsync();
-                                });
+                              //}).ToListAsync();
+                          });
 
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                // filtering by Make only!
+                models = models.Where(m => m.MakeName.Contains(searchString));
+            }
 
             switch (sortOrder)
             {
