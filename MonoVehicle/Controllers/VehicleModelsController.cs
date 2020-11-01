@@ -21,11 +21,22 @@ namespace MonoVehicle.Controllers
         }
 
         // GET: VehicleModels
-        public async Task<IActionResult> Index(string sortOrder, string searchString)
+        public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int? pageNumber)
         {
+            ViewData["CurrentSort"] = sortOrder;
             ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             ViewData["AbrvSortParm"] = sortOrder == "Abrv" ? "abrv_desc" : "Abrv";
             ViewData["MakeSortParm"] = sortOrder == "MakeName" ? "make_desc" : "MakeName";
+
+            if (searchString != null)
+            {
+                pageNumber = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
+
             ViewData["CurrentFilter"] = searchString;
 
 
@@ -74,10 +85,12 @@ namespace MonoVehicle.Controllers
                     break;
             }
 
+            int pageSize = 3;
 
-            //return View(await vehicleContext.ToListAsync());
-            return View(await models.ToListAsync());
+            //return View(await vehicleContext.ToListAsync());            
             //return View(models);
+            //return View(await models.ToListAsync());
+            return View(await PaginatedList<VehicleModelViewModel>.CreateAsync(models.AsNoTracking(), pageNumber ?? 1, pageSize));
         }
 
         // GET: VehicleModels/Details/5
