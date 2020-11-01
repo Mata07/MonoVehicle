@@ -7,8 +7,7 @@ using System.Threading.Tasks;
 namespace MonoVehicle.Models.ViewModels
 {
     public class VehicleModelViewModel
-    {
-        [Key]
+    {        
         public int Id { get; set; }
         public int MakeId { get; set; }
 
@@ -21,8 +20,9 @@ namespace MonoVehicle.Models.ViewModels
         [Display(Name = "Model Abbreviation")]
         public string Abrv { get; set; }        
 
-        public VehicleMake Make { get; set; }
+        //public VehicleMake Make { get; set; }
 
+        [Display(Name = "Make Name")]
         public string MakeName { get; set; }
     }
 }

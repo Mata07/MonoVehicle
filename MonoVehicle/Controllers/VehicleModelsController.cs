@@ -20,68 +20,29 @@ namespace MonoVehicle.Controllers
             _context = context;
         }
 
-        // GET: VehicleModels
-        //public async Task<IActionResult> Index(string sortOrder)
-        //{
-        //    ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
-        //    ViewData["AbrvSortParm"] = sortOrder == "Abrv" ? "abrv_desc" : "Abrv";
-        //    ViewData["MakeSortParm"] = sortOrder == "MakeName" ? "make_desc" : "MakeName";
 
-
-        //    var models = (from model in this._context.VehicleModels
-        //                        join make in this._context.VehicleMakes on model.MakeId equals make.Id
-        //                        select new VehicleModelViewModel
-        //                        {
-        //                            Id = model.Id,
-
-        //                            Name = model.Name,
-
-        //                            MakeId = model.MakeId,
-
-        //                            Abrv = model.Abrv,
-
-        //                            MakeName = make.Name
-
-        //                            //}).ToListAsync();
-        //                        });
-
-
-        //    switch (sortOrder)
-        //    {
-        //        case "name_desc":
-        //            models = models.OrderByDescending(m => m.Name);
-        //            break;
-        //        case "Abrv":
-        //            models = models.OrderBy(m => m.Abrv);
-        //            break;
-        //        case "abrv_desc":
-        //            models = models.OrderByDescending(m => m.Abrv);
-        //            break;
-        //        case "make_desc":
-        //            models = models.OrderByDescending(m => m.MakeName);
-        //            break;
-        //        case "MakeName":
-        //            models = models.OrderBy(m => m.MakeName);
-        //            break;
-        //        default:
-        //            models = models.OrderBy(m => m.Name);
-        //            break;
-        //    }
-
-
-        //    //return View(await vehicleContext.ToListAsync());
-        //    return View(await models.ToListAsync());
-        //    //return View(models);
-        //}
-
-        public async Task<IActionResult> Index(string sortOrder, string searchString)
+        public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int? pageNumber)
         {
+            // The ViewData element named CurrentSort provides the view with the current sort order,
+            // because this must be included in the paging links in order to keep the sort order the same while paging.
+            ViewData["CurrentSort"] = sortOrder;
             ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             ViewData["AbrvSortParm"] = sortOrder == "Abrv" ? "abrv_desc" : "Abrv";
             ViewData["MakeSortParm"] = sortOrder == "MakeName" ? "make_desc" : "MakeName";
-            ViewData["CurrentFilter"] = searchString;            
 
-            List<VehicleModel> models = await _context.VehicleModels.Include(v => v.Make).ToListAsync();
+            // If the search string is changed during paging, the page has to be reset to 1
+            if (searchString != null)
+            {
+                pageNumber = 1;
+            }
+            else
+            {
+                searchString = currentFilter; // what is in queryString??
+            }
+            ViewData["CurrentFilter"] = searchString;
+
+            // Define as IQueryable (hack?) https://entityframeworkcore.com/knowledge-base/50216493/ef-core-conditional--add--includes-to-an-iqueryable
+            IQueryable<VehicleModel> models = _context.VehicleModels.Include(v => v.Make);
 
             if (!String.IsNullOrEmpty(searchString))
             {
@@ -89,32 +50,37 @@ namespace MonoVehicle.Controllers
                 // Contains method on IQueryable object performs case-insensitive comparison(SQL default)
                 // and on IEnumerable object(List<>) performs case-sensitive comparison(.NET Frmw default)
                 // so .ToUpper() makes test explicity case-insensitive
-                models = models.Where(m => m.Make.Name.ToUpper().Contains(searchString.ToUpper())).ToList();
+                models = models.Where(m => m.Make.Name.Contains(searchString));
             }
 
             switch (sortOrder)
             {
                 case "name_desc":
-                    models = models.OrderByDescending(m => m.Name).ToList();
+                    models = models.OrderByDescending(m => m.Name);
                     break;
                 case "Abrv":
-                    models = models.OrderBy(m => m.Abrv).ToList();
+                    models = models.OrderBy(m => m.Abrv);
                     break;
                 case "abrv_desc":
-                    models = models.OrderByDescending(m => m.Abrv).ToList();
+                    models = models.OrderByDescending(m => m.Abrv);
                     break;
                 case "make_desc":
-                    models = models.OrderByDescending(m => m.Make.Name).ToList();
+                    models = models.OrderByDescending(m => m.Make.Name);
                     break;
                 case "MakeName":
-                    models = models.OrderBy(m => m.Make.Name).ToList();
+                    models = models.OrderBy(m => m.Make.Name);
                     break;
                 default:
-                    models = models.OrderBy(m => m.Name).ToList();
+                    models = models.OrderBy(m => m.Name);
                     break;
             }
 
-            return View(models);
+            int pageSize = 3;
+
+            // Call CreateAsync(source, pageIndex, pageSize) on PaginatedList<T> and pass it to View
+            // converts the student query to a single page of students in a collection type that supports paging. 
+            // That single page of students is then passed to the view.
+            return View(await PaginatedList<VehicleModel>.CreateAsync(models.AsNoTracking(), pageNumber ?? 1, pageSize));
         }
 
 
