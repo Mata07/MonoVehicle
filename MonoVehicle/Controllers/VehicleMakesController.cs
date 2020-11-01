@@ -31,6 +31,7 @@ namespace MonoVehicle.Controllers
 
             if (!String.IsNullOrEmpty(searchString))
             {
+                // Contains method on IQueryable object performs case-insensitive comparison(SQL default)
                 makes = makes.Where(m => m.Name.Contains(searchString)
                                       || m.Abrv.Contains(searchString));
             }
