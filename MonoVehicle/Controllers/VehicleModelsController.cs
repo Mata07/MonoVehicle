@@ -86,7 +86,10 @@ namespace MonoVehicle.Controllers
             if (!String.IsNullOrEmpty(searchString))
             {
                 // search by Make only!
-                models = models.Where(m => m.Make.Name.Contains(searchString)).ToList();
+                // Contains method on IQueryable object performs case-insensitive comparison(SQL default)
+                // and on IEnumerable object(List<>) performs case-sensitive comparison(.NET Frmw default)
+                // so .ToUpper() makes test explicity case-insensitive
+                models = models.Where(m => m.Make.Name.ToUpper().Contains(searchString.ToUpper())).ToList();
             }
 
             switch (sortOrder)

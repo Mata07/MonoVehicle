@@ -10,17 +10,18 @@
     <a asp-action="Create">Create New</a>
 </p>
 
-<form action="Index" method="get">
+<form asp-action="Index" method="get">
     <div class="form-group">
         <p>
             Find by Make: <input type="text" name="SearchString" value="@ViewData["CurrentFilter"]" />
-            <input type="submit" name="Search" value="Search" class="btn btn-secondary" />
+            <input type="submit" value="Search" class="btn btn-secondary" /> |
             <a asp-action="Index">Back to List</a>
         </p>
     </div>
-
 </form>
+
 <p class="text-success">@TempData["Message"]</p>
+
 <table class="table">
     <thead>
         <tr>
