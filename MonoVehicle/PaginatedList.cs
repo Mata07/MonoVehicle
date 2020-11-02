@@ -47,5 +47,16 @@ namespace MonoVehicle
 
             return new PaginatedList<T>(items, count, pageIndex, pageSize);
         }
+
+        public static PaginatedList<T> Create(List<T> source, int pageIndex, int pageSize)
+        {
+            var count = source.Count();
+
+            // .Skip() - skips specified number of elements in a sequence
+            // .Take() - takes specified number of elements
+            var items = source.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToList();
+
+            return new PaginatedList<T>(items, count, pageIndex, pageSize);
+        }
     }
 }
