@@ -21,7 +21,7 @@ namespace MonoVehicle.Models.ViewModels
         [Display(Name = "Model Abbreviation")]
         public string Abrv { get; set; }        
 
-        public VehicleMake Make { get; set; }
+        //public VehicleMake Make { get; set; }
 
         public string MakeName { get; set; }
     }

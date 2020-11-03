@@ -20,46 +20,45 @@ namespace MonoVehicle.Controllers
             _context = context;
         }
 
-        // GET: VehicleModels
+        
         public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int? pageNumber)
         {
+            // The ViewData element named CurrentSort provides the view with the current sort order,
+            // because this must be included in the paging links in order to keep the sort order the same while paging.
             ViewData["CurrentSort"] = sortOrder;
             ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             ViewData["AbrvSortParm"] = sortOrder == "Abrv" ? "abrv_desc" : "Abrv";
             ViewData["MakeSortParm"] = sortOrder == "MakeName" ? "make_desc" : "MakeName";
 
+            // If the search string is changed during paging, the page has to be reset to 1
             if (searchString != null)
             {
                 pageNumber = 1;
             }
             else
             {
-                searchString = currentFilter;
+                searchString = currentFilter; // what is in queryString??
             }
 
             ViewData["CurrentFilter"] = searchString;
 
-
-            var models = (from model in this._context.VehicleModels
-                          join make in this._context.VehicleMakes on model.MakeId equals make.Id
-                          select new VehicleModelViewModel
-                          {
-                              Id = model.Id,
-
-                              Name = model.Name,
-
-                              MakeId = model.MakeId,
-
-                              Abrv = model.Abrv,
-
-                              MakeName = make.Name
-
-                              //}).ToListAsync();
-                          });
+            // USE OF VIEWMODEL
+            var models = _context.VehicleModels
+                         .Select(x => new VehicleModelViewModel
+                         {
+                             Id = x.Id,
+                             MakeId = x.MakeId,
+                             Name = x.Name,
+                             MakeName = x.Make.Name,
+                             Abrv = x.Abrv
+                         });
 
             if (!String.IsNullOrEmpty(searchString))
             {
-                // filtering by Make only!
+                // search by Make only!
+                // Contains method on IQueryable object performs case-insensitive comparison(SQL default)
+                // and on IEnumerable object(List<>) performs case-sensitive comparison(.NET Frmw default)
+                // so .ToUpper() makes test explicity case-insensitive
                 models = models.Where(m => m.MakeName.Contains(searchString));
             }
 
@@ -87,11 +86,13 @@ namespace MonoVehicle.Controllers
 
             int pageSize = 3;
 
-            //return View(await vehicleContext.ToListAsync());            
-            //return View(models);
-            //return View(await models.ToListAsync());
-            return View(await PaginatedList<VehicleModelViewModel>.CreateAsync(models.AsNoTracking(), pageNumber ?? 1, pageSize));
+            // Call CreateAsync(source, pageIndex, pageSize) on PaginatedList<T> and pass it to View
+            // converts the student query to a single page of students in a collection type that supports paging. 
+            // That single page of students is then passed to the view.
+            return View(await PaginatedList<VehicleModelViewModel>.CreateAsync(models.AsQueryable(), pageNumber ?? 1, pageSize));
         }
+
+
 
         // GET: VehicleModels/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -112,6 +113,7 @@ namespace MonoVehicle.Controllers
 
             return View(vehicleModel);
         }
+
 
         // GET: VehicleModels/Create
         public IActionResult Create()
@@ -146,6 +148,8 @@ namespace MonoVehicle.Controllers
             ViewData["MakeId"] = new SelectList(_context.VehicleMakes, "Id", "Name", vehicleModel.MakeId);
             return View(vehicleModel);
         }
+
+
 
         // GET: VehicleModels/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -195,36 +199,10 @@ namespace MonoVehicle.Controllers
             }
 
             ViewData["MakeId"] = new SelectList(_context.VehicleMakes, "Id", "Name", vehicleModelToUpdate.MakeId);
-            return View(vehicleModelToUpdate);
-
-            //if (id != vehicleModel.Id)
-            //{
-            //    return NotFound();
-            //}
-
-            //if (ModelState.IsValid)
-            //{
-            //    try
-            //    {
-            //        _context.Update(vehicleModel);
-            //        await _context.SaveChangesAsync();
-            //    }
-            //    catch (DbUpdateConcurrencyException)
-            //    {
-            //        if (!VehicleModelExists(vehicleModel.Id))
-            //        {
-            //            return NotFound();
-            //        }
-            //        else
-            //        {
-            //            throw;
-            //        }
-            //    }
-            //    return RedirectToAction(nameof(Index));
-            //}
-            //ViewData["MakeId"] = new SelectList(_context.VehicleMakes, "Id", "Name", vehicleModel.MakeId);
-            //return View(vehicleModel);
+            return View(vehicleModelToUpdate);           
         }
+
+
 
         // GET: VehicleModels/Delete/5
         public async Task<IActionResult> Delete(int? id, bool? saveChangesError = false)
@@ -274,11 +252,6 @@ namespace MonoVehicle.Controllers
                 return RedirectToAction(nameof(Delete), new { id = id, saveChangesError = true });
             }
 
-        }
-
-        //private bool VehicleModelExists(int id)
-        //{
-        //    return _context.VehicleModels.Any(e => e.Id == id);
-        //}
+        }    
     }
 }
