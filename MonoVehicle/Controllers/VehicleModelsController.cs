@@ -39,59 +39,6 @@ namespace MonoVehicle.Controllers
 
         //    ViewData["CurrentFilter"] = searchString;
 
-
-        //    //var models = (from model in this._context.VehicleModels
-        //    //              join make in this._context.VehicleMakes on model.MakeId equals make.Id
-        //    //              select new VehicleModelViewModel
-        //    //              {
-        //    //                  Id = model.Id,
-
-        //    //                  Name = model.Name,
-
-        //    //                  MakeId = model.MakeId,
-
-        //    //                  Abrv = model.Abrv,
-
-        //    //                  MakeName = make.Name
-
-        //    //                  //}).ToListAsync();
-        //    //              });
-
-        //    //if (!String.IsNullOrEmpty(searchString))
-        //    //{
-        //    //    // filtering by Make only!
-        //    //    models = models.Where(m => m.MakeName.Contains(searchString));
-        //    //}
-
-        //    //switch (sortOrder)
-        //    //{
-        //    //    case "name_desc":
-        //    //        models = models.OrderByDescending(m => m.Name);
-        //    //        break;
-        //    //    case "Abrv":
-        //    //        models = models.OrderBy(m => m.Abrv);
-        //    //        break;
-        //    //    case "abrv_desc":
-        //    //        models = models.OrderByDescending(m => m.Abrv);
-        //    //        break;
-        //    //    case "make_desc":
-        //    //        models = models.OrderByDescending(m => m.MakeName);
-        //    //        break;
-        //    //    case "MakeName":
-        //    //        models = models.OrderBy(m => m.MakeName);
-        //    //        break;
-        //    //    default:
-        //    //        models = models.OrderBy(m => m.Name);
-        //    //        break;
-        //    //}
-
-        //    //int pageSize = 3;
-
-        //    ////return View(await vehicleContext.ToListAsync());            
-        //    ////return View(models);
-        //    ////return View(await models.ToListAsync());
-        //    //return View(await PaginatedList<VehicleModelViewModel>.CreateAsync(models.AsNoTracking(), pageNumber ?? 1, pageSize));
-
         //    // Define as IQueryable (hack?) https://entityframeworkcore.com/knowledge-base/50216493/ef-core-conditional--add--includes-to-an-iqueryable
 
         //    IQueryable<VehicleModel> models = _context.VehicleModels.Include(v => v.Make);
@@ -131,35 +78,18 @@ namespace MonoVehicle.Controllers
         //    int pageSize = 3;
 
         //    var list = new List<VehicleModelViewModel>();
-
-
         //    foreach (var item in models)
-
         //    {
-
         //        VehicleModelViewModel objcvm = new VehicleModelViewModel(); // ViewModel
-
         //        objcvm.Name = item.Name;
-
         //        objcvm.Id = item.Id;
-
         //        objcvm.MakeId = item.MakeId;
-
         //        objcvm.MakeName = item.Make.Name;
-
         //        objcvm.Abrv = item.Abrv;
 
         //        list.Add(objcvm);
-
         //    }
-
-        //    //return View(models);
-
-        //    // Call CreateAsync(source, pageIndex, pageSize) on PaginatedList<T> and pass it to View
-        //    // converts the student query to a single page of students in a collection type that supports paging. 
-        //    // That single page of students is then passed to the view.
-
-        //    // koristi dodanu non-async metodu Create() umjesto CreateAsync - zato je Index IActionResult a ne Task<IActionResult>
+        //    koristi dodanu non-async metodu Create() umjesto CreateAsync - zato je Index IActionResult a ne Task<IActionResult>
         //    return View(PaginatedList<VehicleModelViewModel>.Create(list, pageNumber ?? 1, pageSize));
         //}
 
@@ -183,19 +113,17 @@ namespace MonoVehicle.Controllers
             }
             ViewData["CurrentFilter"] = searchString;
 
-            // Define as IQueryable (hack?) https://entityframeworkcore.com/knowledge-base/50216493/ef-core-conditional--add--includes-to-an-iqueryable
-            //IQueryable<VehicleModel> models = _context.VehicleModels.Include(v => v.Make);
 
             // USE OF VIEWMODEL
             var models = _context.VehicleModels
-                            .Select(x => new VehicleModelViewModel
-                            {
-                                Id = x.Id,
-                                MakeId = x.MakeId,
-                                Name = x.Name,
-                                MakeName = x.Make.Name,
-                                Abrv = x.Abrv
-                            });
+                         .Select(x => new VehicleModelViewModel
+                         {
+                             Id = x.Id,
+                             MakeId = x.MakeId,
+                             Name = x.Name,
+                             MakeName = x.Make.Name,
+                             Abrv = x.Abrv
+                         });
 
             if (!String.IsNullOrEmpty(searchString))
             {
@@ -203,7 +131,7 @@ namespace MonoVehicle.Controllers
                 // Contains method on IQueryable object performs case-insensitive comparison(SQL default)
                 // and on IEnumerable object(List<>) performs case-sensitive comparison(.NET Frmw default)
                 // so .ToUpper() makes test explicity case-insensitive
-                models = models.Where(m => m.MakeName.ToUpper().Contains(searchString.ToUpper()));
+                models = models.Where(m => m.MakeName.Contains(searchString));
             }
 
             switch (sortOrder)
@@ -221,7 +149,7 @@ namespace MonoVehicle.Controllers
                     models = models.OrderByDescending(m => m.MakeName);
                     break;
                 case "MakeName":
-                    models = models.OrderBy(m => m.Make.Name);
+                    models = models.OrderBy(m => m.MakeName);
                     break;
                 default:
                     models = models.OrderBy(m => m.Name);
@@ -229,10 +157,6 @@ namespace MonoVehicle.Controllers
             }
 
             int pageSize = 3;
-
-            var count2 = await models.CountAsync();
-
-            //return View(models);
 
             // Call CreateAsync(source, pageIndex, pageSize) on PaginatedList<T> and pass it to View
             // converts the student query to a single page of students in a collection type that supports paging. 
